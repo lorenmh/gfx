@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import styled from 'styled-components';
 
 const StyledCanvasWrapper = styled.div`
@@ -16,17 +16,117 @@ const StyledCanvasWrapper = styled.div`
 export default class View extends Component {
   constructor(props) {
     super(props);
-    this.canvas = React.createRef();
+
+    this.canvasRef = React.createRef();
+  }
+
+  componentDidMount() {
+    this.draw();
   }
 
   draw() {
-    if (!this.myRef)
-      return;
+    if (!this.canvasRef) return;
+
+    const canvasEl = this.canvasRef.current;
+
+    let gl;
+
+    try {
+      gl = canvasEl.getContext('webgl');
+
+      if (!gl) {
+        gl = canvasEl.getContext('experimental-webgl');
+      }
+    } catch(e) {
+      return console.log('gl not created');
+    }
+
+    gl.viewportWidth = canvasEl.width;
+    gl.viewportHeight = canvasEl.height;
+
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    const vertexShaderEl = document.getElementById('shader-vs');
+    gl.shaderSource(vertexShader, vertexShaderEl.text);
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+      return console.log(gl.getShaderInfoLog(vertexShader));
+    }
+
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    const fragmentShaderEl = document.getElementById('shader-fs');
+    gl.shaderSource(fragmentShader, fragmentShaderEl.text);
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+      return console.log(gl.getShaderInfoLog(fragmentShader));
+    }
+
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      return console.log("could not initialise shaders");
+    }
+
+    gl.useProgram(program);
+
+    program.positionAttr = gl.getAttribLocation(program, 'positionAttr');
+    gl.enableVertexAttribArray(program.positionAttr);
+
+    program.colorAttr = gl.getAttribLocation(program, 'colorAttr');
+    gl.enableVertexAttribArray(program.colorAttr);
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+    const vertexData = [
+        // X    Y     Z     R     G     B     A
+        0.0,   0.8,  0.0,  1.0,  0.0,  0.0,  1.0,
+        // X    Y     Z     R     G     B     A
+        -0.8, -0.8,  0.0,  0.0,  1.0,  0.0,  1.0,
+        // X    Y     Z     R     G     B     A
+        0.8,  -0.8,  0.0,  0.0,  0.0,  1.0,  1.0
+    ];
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.disable(gl.DEPTH_TEST);
+
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+    const stride = 7 * Float32Array.BYTES_PER_ELEMENT;
+
+    gl.vertexAttribPointer(
+      program.positionAttr,
+      3,
+      gl.FLOAT,
+      false,
+      stride,
+      0
+    );
+
+    gl.vertexAttribPointer(
+      program.colorAttr,
+      4,
+      gl.FLOAT,
+      false,
+      stride,
+      3 * Float32Array.BYTES_PER_ELEMENT
+    );
+
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
   render() {
     return (
-      <canvas />
+      <Fragment>
+
+        <StyledCanvasWrapper>
+          <canvas ref={this.canvasRef} />
+        </StyledCanvasWrapper>
+      </Fragment>
     );
   }
 }
