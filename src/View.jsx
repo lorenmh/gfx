@@ -55,6 +55,11 @@ export default class View extends Component {
     const vertexEl = this.vertexRef.current;
     const fragmentEl = this.fragmentRef.current;
 
+    const { width, height } = canvasEl.getBoundingClientRect();
+
+    canvasEl.setAttribute('width', width);
+    canvasEl.setAttribute('height', height);
+
     let gl;
 
     try {
@@ -115,7 +120,7 @@ export default class View extends Component {
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.5, 0.2, 0.2, 1.0);
     gl.disable(gl.DEPTH_TEST);
 
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
