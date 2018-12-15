@@ -9,27 +9,6 @@
   </head>
 
   <body>
-    <script id="shader-vs" type="x-shader/x-vertex">
-      attribute vec3 positionAttr;
-      attribute vec4 colorAttr;
-
-      varying vec4 vColor;
-
-      void main(void) {
-        gl_Position = vec4(positionAttr, 1.0);
-        vColor = colorAttr;
-      }
-    </script>
-
-    <script if="fragment-vs" type="x-shader/x-fragment">
-      precision mediump float;
-
-      varying vec4 vColor;
-
-      void main(void) {
-        gl_FragColor = vColor;
-      }
-    </script>
     <div id="root"></div>
   </body>
 </html>

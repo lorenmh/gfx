@@ -13,10 +13,34 @@ const StyledCanvasWrapper = styled.div`
   }
 `;
 
+const vertexShaderSource = `
+  attribute vec3 positionAttr;
+  attribute vec4 colorAttr;
+
+  varying vec4 vColor;
+
+  void main(void) {
+    gl_Position = vec4(positionAttr, 1.0);
+    vColor = colorAttr;
+  }
+`;
+
+const fragmentShaderSource = `
+  precision mediump float;
+
+  varying vec4 vColor;
+
+  void main(void) {
+    gl_FragColor = vColor;
+  }
+`;
+
 export default class View extends Component {
   constructor(props) {
     super(props);
 
+    this.vertexRef = React.createRef();
+    this.fragmentRef = React.createRef();
     this.canvasRef = React.createRef();
   }
 
@@ -25,9 +49,11 @@ export default class View extends Component {
   }
 
   draw() {
-    if (!this.canvasRef) return;
+    if (!this.canvasRef || !this.vertexRef || !this.fragmentRef) return;
 
     const canvasEl = this.canvasRef.current;
+    const vertexEl = this.vertexRef.current;
+    const fragmentEl = this.fragmentRef.current;
 
     let gl;
 
@@ -45,17 +71,17 @@ export default class View extends Component {
     gl.viewportHeight = canvasEl.height;
 
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    const vertexShaderEl = document.getElementById('shader-vs');
-    gl.shaderSource(vertexShader, vertexShaderEl.text);
+    gl.shaderSource(vertexShader, vertexEl.text);
+    gl.compileShader(vertexShader);
     if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-      return console.log(gl.getShaderInfoLog(vertexShader));
+      return console.error(gl.getShaderInfoLog(vertexShader));
     }
 
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-    const fragmentShaderEl = document.getElementById('shader-fs');
-    gl.shaderSource(fragmentShader, fragmentShaderEl.text);
+    gl.shaderSource(fragmentShader, fragmentEl.text);
+    gl.compileShader(fragmentShader);
     if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-      return console.log(gl.getShaderInfoLog(fragmentShader));
+      return console.error(gl.getShaderInfoLog(fragmentShader));
     }
 
     const program = gl.createProgram();
@@ -122,6 +148,13 @@ export default class View extends Component {
   render() {
     return (
       <Fragment>
+        <script ref={this.vertexRef} type="x-shader/x-vertex">
+          {vertexShaderSource}
+        </script>
+
+        <script ref={this.fragmentRef} type="x-shader/x-fragment">
+          {fragmentShaderSource}
+        </script>
 
         <StyledCanvasWrapper>
           <canvas ref={this.canvasRef} />
