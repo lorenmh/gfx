@@ -111,16 +111,22 @@ export default class View extends Component {
 
     const vertexData = [
         // X    Y     Z     R     G     B     A
-        0.0,   0.8,  0.0,  1.0,  0.0,  0.0,  1.0,
+        1.0,   1.0,  0.0,  1.0,  0.0,  0.0,  1.0,
         // X    Y     Z     R     G     B     A
-        -0.8, -0.8,  0.0,  0.0,  1.0,  0.0,  1.0,
+        -1.0, -1.0,  0.0,  0.0,  1.0,  0.0,  1.0,
         // X    Y     Z     R     G     B     A
-        0.8,  -0.8,  0.0,  0.0,  0.0,  1.0,  1.0
+        1.0,  -1.0,  0.0,  0.0,  0.0,  1.0,  1.0,
+        // X    Y     Z     R     G     B     A
+        -1.0,   1.0,  0.0,  0.0,  0.0,  1.0,  1.0,
+        // X    Y     Z     R     G     B     A
+        -1.0, -1.0,  0.0,  0.0,  1.0,  0.0,  1.0,
+        // X    Y     Z     R     G     B     A
+        1.0,  1.0,  0.0,  1.0,  0.0,  0.0,  1.0,
     ];
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
 
-    gl.clearColor(0.5, 0.2, 0.2, 1.0);
+    gl.clearColor(1.0, 1.0, 1.0, 1.0);
     gl.disable(gl.DEPTH_TEST);
 
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -147,7 +153,7 @@ export default class View extends Component {
       3 * Float32Array.BYTES_PER_ELEMENT
     );
 
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
   }
 
   render() {
