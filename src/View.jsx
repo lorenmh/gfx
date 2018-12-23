@@ -35,6 +35,38 @@ const fragmentShaderSource = `
   }
 `;
 
+const pyramid = new Float32Array([
+  // base-triangle-1
+  -0.5, 0.5, 0.0,
+  -0.5, -0.5, 0.0,
+  0.5, -0.5, 0.0,
+
+  // base-triangle-2
+  -0.5, 0.5, 0.0,
+  0.5, 0.5, 0.0,
+  0.5, -0.5, 0.0,
+
+  // side-1
+  -0.5, 0.5, 0.0,
+  0.5, 0.5, 0.0,
+  0.0, 0.0, 0.5,
+
+  // side-2
+  0.5, 0.5, 0.0,
+  0.5, -0.5, 0.0,
+  0.0, 0.0, 0.5,
+
+  // side-3
+  0.5, -0.5, 0.0,
+  -0.5, -0.5, 0.0,
+  0.0, 0.0, 0.5,
+
+  // side-4
+  -0.5, -0.5, 0.0,
+  -0.5, 0.5, 0.0,
+  0.0, 0.0, 0.5,
+]);
+
 export default class View extends Component {
   constructor(props) {
     super(props);
