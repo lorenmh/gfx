@@ -31,7 +31,7 @@ export default class View extends Component {
     camera.position.set(0, 0, 500);
     camera.lookAt(0, 0, 0);
 
-    Object.assign(this, {scene, camera, renderer});
+    Object.assign(this, { scene, camera, renderer });
   }
 
   populateScene() {
