@@ -5,16 +5,17 @@
   "dependencies": {
     "babel-plugin-styled-components": "^1.9.4",
     "react": "^16.6.3",
-    "react-app-rewired": "^1.6.2",
+    "react-app-rewired": "^2.1.1",
     "react-dom": "^16.6.3",
     "react-scripts": "2.1.1",
-    "styled-components": "^4.1.2"
+    "styled-components": "^4.1.2",
+    "three": "^0.102.1"
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "react-app-rewird build",
-    "test": "react-app-rewird test",
-    "eject": "react-app-rewird eject"
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -24,5 +25,8 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "customize-cra": "^0.2.12"
+  }
 }

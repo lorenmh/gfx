@@ -8,6 +8,7 @@ const GlobalStyle = createGlobalStyle`
     height: 100%;
     margin: 0;
     padding: 0;
+    overflow: hidden;
   }
 
   #root {
@@ -21,7 +22,7 @@ const StyledApp = styled.div`
   height: 100%;
 `;
 
-class App extends Component {
+export default class App extends Component {
   render() {
     return (
       <StyledApp>
@@ -31,5 +32,3 @@ class App extends Component {
     );
   }
 }
-
-export default App;
