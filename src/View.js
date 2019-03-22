@@ -29,7 +29,7 @@ export default class View extends Component {
     directionalLight.position.set(0, 0, 1000).normalize();
     scene.add(directionalLight);
 
-    const ambientLight = new T.AmbientLight(0xc8c8c8);
+    const ambientLight = new T.AmbientLight(0xd8d8d8);
     scene.add(ambientLight);
 
     const background = Cube({
@@ -44,10 +44,10 @@ export default class View extends Component {
     });
     scene.add(background);
 
-    const spotLight = new T.SpotLight(0xffffff, 0.01);
+    const spotLight = new T.SpotLight(0xffffff, 0.1);
     spotLight.castShadow = true;
-    spotLight.position.set(0, 0, 2000);
-    spotLight.angle = Math.PI / 9
+    spotLight.position.set(0, 0, 1000);
+    spotLight.angle = Math.PI / 3
     spotLight.shadow.camera.near = 200;
     spotLight.shadow.camera.far = 4000;
     spotLight.shadow.mapSize.width = 4096;
@@ -74,27 +74,31 @@ export default class View extends Component {
   populateScene() {
     const { scene }  = this;
 
-    const cube1 = Cube({ x: 0,    y: 300,   z: 50, edges: false });
-    const cube2 = Cube({ x: -260, y: -150,  z: 50, edges: false });
-    const cube3 = Cube({ x: 260,  y: -150,  z: 50, edges: false });
+    const cube1 = Cube({ color: 0xfa4444, x: 0,    y: 300,   z: 50, edges: false });
+    const cube2 = Cube({ color: 0xfa4444, x: -260, y: -150,  z: 50, edges: false });
+    const cube3 = Cube({ color: 0xfa4444, x: 260,  y: -150,  z: 50, edges: false });
 
-    scene.add(cube1);
-    scene.add(cube2);
-    scene.add(cube3);
+    const group = new T.Group();
+    group.add(cube1, cube2, cube3);
+    scene.add(group);
 
     window.test = this;
-    Object.assign(this, { cube1, cube2, cube3 });
+    Object.assign(this, { group, cube1, cube2, cube3 });
   }
 
   animate() {
-    const { cube1, cube2, cube3, renderer, scene, camera } = this;
+    const { group, cube1, cube2, cube3, renderer, scene, camera } = this;
     requestAnimationFrame(this.animate);
-    if (camera.position.z < 1000) camera.position.z += 1;
-    if (camera.position.y < 0) camera.position.y += 1;
-    camera.lookAt(0, 0, 0);
-    //cube1.rotation.z += 0.005;
-    //cube2.rotation.z += 0.005;
-    //cube3.rotation.z += 0.005;
+    group.rotation.z += 0.01;
+    cube1.rotation.z -= 0.005;
+    cube2.rotation.z -= 0.005;
+    cube3.rotation.z -= 0.005;
+    if (camera.position.z < 1000) {
+      camera.position.z += 5;
+      camera.position.y += 5;
+      camera.lookAt(0, 0, 0);
+    } else {
+    }
 
     renderer.render(scene, camera);
   }

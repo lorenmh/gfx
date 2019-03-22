@@ -9,7 +9,7 @@ export const TYPE = atoms`
 window.atoms = atoms;
 
 const DEFAULTS = {
-  width: 200,
+  width: 100,
   height: 100,
   depth: 100,
   color: 0xff0000,
