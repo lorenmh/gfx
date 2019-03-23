@@ -70,7 +70,7 @@ export default class View extends Component {
     renderer.setSize(width, height);
     viewEl.appendChild(renderer.domElement);
 
-    camera.position.set(0, 0, 1500);
+    camera.position.set(0, -1000, 1500);
     camera.lookAt(0, 0, 0);
 
     //scene.add(new T.AxesHelper(5));
@@ -86,37 +86,31 @@ export default class View extends Component {
     const colors = d3.schemeSet3.map(s => parseInt(s.slice(1), 16));
     const color = i => colors[Math.floor(Math.random()*10)];
 
-    const ribbons = [...Array(10)]
+    const ribbons1 = [...Array(10)]
       .map((_, i) => Ribbon({ color: color(i), data: rdata(), y: 900 - 200*i }))
     ;
     const ribbons2 = [...Array(10)]
       .map((_, i) => Ribbon({ color: color(i), data: rdata(), y: 1000 - 200*i, z: 0 }))
     ;
+
+    const ribbons = ribbons1.concat(ribbons2);
     scene.add.apply(scene, ribbons);
-    scene.add.apply(scene, ribbons2);
 
-    const box1 = Box({ color: 0xfa4444, x: 0,    y: 300,   z: 60, edges: false });
-    const box2 = Box({ color: 0xfa4444, x: -260, y: -150,  z: 60, edges: false });
-    const box3 = Box({ color: 0xfa4444, x: 260,  y: -150,  z: 60, edges: false });
-
-    const group = new T.Group();
-    //group.add(box1, box2, box3);
-    //scene.add(group);
-
-    window.test = this;
-    Object.assign(this, { group, box1, box2, box3 });
+    Object.assign(this, { ribbons });
   }
 
-  animate(d1=1, d2=1, d3=1) {
-    const { group, box1, box2, box3, renderer, scene, camera } = this;
-    group.position.z += 0.01;
+  animate(d=[...Array(20)].map(() => -1)) {
+    const { camera, renderer, scene, ribbons } = this;
 
-    const dchange = (d, {position: {z}}) => (z < 60 || z > 400)
-      ? d * -1
-      : d
-    ;
+    const dchange = (d, {position: {z}}) => (
+      (d < 0 && z < 60) || (d > 0 && z > 400)
+        ? d * -1
+        : d
+    );
 
-    
+
+    d = d3.zip(d, ribbons).map(([ $d, r ]) => dchange($d, r));
+    d3.zip(d, ribbons).forEach(([ $d, r ]) => r.position.z += $d * Math.abs(Math.log(Math.random()))*5);
 
     // d1 = dchange(d1, box1);
     // d2 = dchange(d2, box2);
@@ -127,15 +121,15 @@ export default class View extends Component {
     // box3.position.z += d3 * 10;
 
     if (camera.position.y < 0) {
-    //  camera.position.z += 4;
-    //  camera.position.y += 5;
-    //  camera.lookAt(0, 0, 0);
+      camera.position.z += 4;
+      camera.position.y += 5;
+      camera.lookAt(0, 0, 0);
     } else {
     }
 
     renderer.render(scene, camera);
 
-    requestAnimationFrame(this.animate.bind(this, d1, d2, d3));
+    requestAnimationFrame(this.animate.bind(this, d));
   }
 
   componentDidMount() {
