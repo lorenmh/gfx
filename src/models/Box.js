@@ -16,13 +16,13 @@ const DEFAULTS = {
   edges: false,
   x: 0,
   y: 0,
-  z: 300,
+  z: 0,
   castShadow: true,
   receiveShadow: true,
 };
 
-export default function Box(params) {
-  const $ = Object.assign({}, DEFAULTS, params);
+export default function Box($) {
+  $ = Object.assign({}, DEFAULTS, $);
 
   const group = new T.Group();
 
