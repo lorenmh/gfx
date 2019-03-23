@@ -30,7 +30,7 @@ export default class View extends Component {
     const { width, height } =  viewEl.getBoundingClientRect();
 
     const scene = new T.Scene();
-    scene.background = new T.Color(0xeaeaea);
+    scene.background = new T.Color(0x051231);
 
     const directionalLight = new T.DirectionalLight(0xffffff, 0.1);
     directionalLight.position.set(0, 200, 1000).normalize();
@@ -49,7 +49,7 @@ export default class View extends Component {
       y: 0,
       z: 0,
     });
-    scene.add(background);
+    //scene.add(background);
 
     const spotLight = new T.SpotLight(0xffffff, 0.4);
     spotLight.castShadow = true;
@@ -70,10 +70,10 @@ export default class View extends Component {
     renderer.setSize(width, height);
     viewEl.appendChild(renderer.domElement);
 
-    camera.position.set(0, -2000, 100);
+    camera.position.set(0, 0, 1500);
     camera.lookAt(0, 0, 0);
 
-    scene.add(new T.AxesHelper(5));
+    //scene.add(new T.AxesHelper(5));
 
     window.d3 = d3;
 
@@ -84,11 +84,16 @@ export default class View extends Component {
     const { scene }  = this;
 
     const colors = d3.schemeSet3.map(s => parseInt(s.slice(1), 16));
+    const color = i => colors[Math.floor(Math.random()*10)];
 
     const ribbons = [...Array(10)]
-      .map((_, i) => Ribbon({ color: colors[i], data: rdata(), y: 900 - 200*i }))
+      .map((_, i) => Ribbon({ color: color(i), data: rdata(), y: 900 - 200*i }))
+    ;
+    const ribbons2 = [...Array(10)]
+      .map((_, i) => Ribbon({ color: color(i), data: rdata(), y: 1000 - 200*i, z: 0 }))
     ;
     scene.add.apply(scene, ribbons);
+    scene.add.apply(scene, ribbons2);
 
     const box1 = Box({ color: 0xfa4444, x: 0,    y: 300,   z: 60, edges: false });
     const box2 = Box({ color: 0xfa4444, x: -260, y: -150,  z: 60, edges: false });
@@ -122,9 +127,9 @@ export default class View extends Component {
     // box3.position.z += d3 * 10;
 
     if (camera.position.y < 0) {
-      camera.position.z += 4;
-      camera.position.y += 5;
-      camera.lookAt(0, 0, 0);
+    //  camera.position.z += 4;
+    //  camera.position.y += 5;
+    //  camera.lookAt(0, 0, 0);
     } else {
     }
 
