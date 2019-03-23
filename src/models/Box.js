@@ -17,8 +17,8 @@ const DEFAULTS = {
   x: 0,
   y: 0,
   z: 0,
-  castShadow: false,//true,
-  receiveShadow: false,//true,
+  castShadow: true,
+  receiveShadow: true,
 };
 
 export default function Box($) {

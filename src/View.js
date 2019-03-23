@@ -12,6 +12,8 @@ const StyledViewWrapper = styled.div`
   background-color: green;
 `;
 
+const PI2 = Math.PI*2;
+
 
 const rdata = () => [...Array(100)]
   .map((_, i) => [i, Math.log(Math.random()*10)])
@@ -43,17 +45,18 @@ export default class View extends Component {
       width: 2000,
       height: 2000,
       depth: 10,
-      color: 0x8f8f8f8f,
-      edges: true,
+      // color: 0x8f8f8f8f,
+       color: 0x000827,
+      //edges: true,
       x: 0,
       y: 0,
-      z: 0,
+      z: -200,
     });
-    //scene.add(background);
+    scene.add(background);
 
-    const spotLight = new T.SpotLight(0xffffff, 0.4);
+    const spotLight = new T.SpotLight(0xffffff, 1);
     spotLight.castShadow = true;
-    spotLight.position.set(0, 0, 1000);
+    spotLight.position.set(0, 300, 1200);
     spotLight.angle = Math.PI / 3
     spotLight.shadow.camera.near = 200;
     spotLight.shadow.camera.far = 4000;
@@ -86,31 +89,23 @@ export default class View extends Component {
     const colors = d3.schemeSet3.map(s => parseInt(s.slice(1), 16));
     const color = i => colors[Math.floor(Math.random()*10)];
 
-    const ribbons1 = [...Array(10)]
-      .map((_, i) => Ribbon({ color: color(i), data: rdata(), y: 900 - 200*i }))
-    ;
-    const ribbons2 = [...Array(10)]
-      .map((_, i) => Ribbon({ color: color(i), data: rdata(), y: 1000 - 200*i, z: 0 }))
+    const ribbons = [...Array(20)]
+      .map((_, i) => Ribbon({ color: color(i), data: rdata(), y: 1000 - 100*i }))
     ;
 
-    const ribbons = ribbons1.concat(ribbons2);
     scene.add.apply(scene, ribbons);
 
     Object.assign(this, { ribbons });
   }
 
-  animate(d=[...Array(20)].map(() => -1)) {
+  animate(i) {
     const { camera, renderer, scene, ribbons } = this;
 
-    const dchange = (d, {position: {z}}) => (
-      (d < 0 && z < 60) || (d > 0 && z > 400)
-        ? d * -1
-        : d
-    );
-
-
-    d = d3.zip(d, ribbons).map(([ $d, r ]) => dchange($d, r));
-    d3.zip(d, ribbons).forEach(([ $d, r ]) => r.position.z += $d * Math.abs(Math.log(Math.random()))*5);
+    ribbons.forEach((r, $i) => {
+      r.position.z = (
+        Math.sin((i * PI2 / 100) + ($i * PI2 / 10) + 1) * 50
+      );
+    });
 
     // d1 = dchange(d1, box1);
     // d2 = dchange(d2, box2);
@@ -120,22 +115,22 @@ export default class View extends Component {
     // box2.position.z += d2 * 10;
     // box3.position.z += d3 * 10;
 
-    if (camera.position.y < 0) {
-      camera.position.z += 4;
-      camera.position.y += 5;
-      camera.lookAt(0, 0, 0);
-    } else {
-    }
+     //if (camera.position.y < 0) {
+     //  camera.position.z += 4;
+     //  camera.position.y += 5;
+     //  camera.lookAt(0, 0, 0);
+     //} else {
+     //}
 
     renderer.render(scene, camera);
 
-    requestAnimationFrame(this.animate.bind(this, d));
+    requestAnimationFrame(this.animate.bind(this, ++i % 100));
   }
 
   componentDidMount() {
     this.initialize();
     this.populateScene();
-    this.animate();
+    this.animate(0);
   }
 
   render() {
