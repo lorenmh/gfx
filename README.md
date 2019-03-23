@@ -1,2 +1,2 @@
 # gfx
-![](screenshot.png)
+![](screenshot2.png)
