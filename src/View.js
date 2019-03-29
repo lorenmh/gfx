@@ -66,14 +66,14 @@ export default class View extends Component {
     scene.add(spotLight);
 
 
-    const camera = new T.PerspectiveCamera(90, width/height, 1, 10000);
+    const camera = new T.PerspectiveCamera(70, width/height, 1, 10000);
     const renderer = new T.WebGLRenderer({ antialias: true });
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.PCFShadowMap;
     renderer.setSize(width, height);
     viewEl.appendChild(renderer.domElement);
 
-    camera.position.set(0, -1000, 500);
+    camera.position.set(0, -1300, 1200);
     camera.lookAt(0, 0, 0);
 
     //scene.add(new T.AxesHelper(5));
@@ -103,7 +103,7 @@ export default class View extends Component {
 
     ribbons.forEach((r, $i) => {
       r.position.z = (
-        ((Math.sin((i * PI2 / 100) + ($i * PI2 / 10)) + 1) * 8)
+        ((Math.sin((i * PI2 / 100) + ($i * PI2 / 10)) + 1) * 10)
       ) + 100;
     });
 
@@ -115,12 +115,12 @@ export default class View extends Component {
     // box2.position.z += d2 * 10;
     // box3.position.z += d3 * 10;
 
-    if (camera.position.y < 0) {
-      camera.position.z += 4;
-      camera.position.y += 5;
-      camera.lookAt(0, 0, 0);
-    } else {
-    }
+    // if (camera.position.y < 0) {
+    //   camera.position.z += 4;
+    //   camera.position.y += 5;
+    //   camera.lookAt(0, 0, 0);
+    // } else {
+    // }
 
     renderer.render(scene, camera);
 
