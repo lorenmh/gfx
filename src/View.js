@@ -87,23 +87,51 @@ export default class View extends Component {
     const { scene }  = this;
 
     const colors = d3.schemeSet3.map(s => parseInt(s.slice(1), 16));
-    const color = i => colors[Math.floor(Math.random()*10)];
 
-    const ribbons = [...Array(20)]
-      .map((_, i) => Ribbon({ color: color(i), data: rdata(), y: 1000 - 100*i }))
-    ;
+    const c = {};
+    const color = (i) => {
+      if (c[i] === undefined)
+        c[i] = colors[Math.floor(Math.random()*10)]
+      ;
 
+      return c[i];
+    };
+
+    const d = [...Array(20)].map(rdata);
+
+    const ribbons = (
+      d.map((d, i) => Ribbon({ color: color(i), data: d, y: 1000 - 100*i }))
+    );
+
+    const streamers = (
+      d.map((d, i) => Ribbon({
+        color: color(i),
+        data: d,
+        y: 1000 - 100*i,
+        transparent: true,
+        castShadow: false,
+        receiveShadow: false 
+      }))
+    );
+
+    scene.add.apply(scene, streamers);
     scene.add.apply(scene, ribbons);
 
-    Object.assign(this, { ribbons });
+    Object.assign(this, { ribbons, streamers });
   }
 
   animate(i) {
-    const { camera, renderer, scene, ribbons } = this;
+    const { camera, renderer, scene, ribbons, streamers } = this;
 
     ribbons.forEach((r, $i) => {
       r.position.z = (
-        ((Math.sin((i * PI2 / 100) + ($i * PI2 / 10)) + 1) * 10)
+        ((Math.sin((i * PI2 / 100) + ($i * PI2 / 10)) + 1) * 20)
+      ) + 100;
+    });
+
+    streamers.forEach((r, $i) => {
+      r.position.z = (
+        ((Math.sin((((i-10)%100) * PI2 / 100) + ($i * PI2 / 10)) + 1) * 20)
       ) + 100;
     });
 

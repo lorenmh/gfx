@@ -8,6 +8,8 @@ export const TYPE = atoms`
 
 `;
 
+const PI2 = Math.PI*2;
+
 const DEFAULTS = {
   data: [...Array(100)].map((_, i) => [i, Math.log(Math.random()*10)]),
   xFn: ([x]) => x,
@@ -17,6 +19,8 @@ const DEFAULTS = {
   strokeWidth: 4,
   strokeDepth: 30,
   color: 0xff0000,
+  transparent: false,
+  opacity: 0.2,
   edges: false,
   x: 0,
   y: 0,
@@ -34,12 +38,34 @@ const normalVec = ([x1, y1], [x2, y2]) => {
   return [ nx / magnitude, ny / magnitude ];
 }
 
+const dot = ([x1, y1], [x2, y2]) => {
+  return x1 * x2 + y1 * y2;
+}
+
+const magnitude = v => Math.hypot.apply(Math, v);
+
+const angle = (v1, v2) => {
+  return Math.acos(dot(v1, v2) / (magnitude(v1) * magnitude(v2)));
+};
+
+const unitVec = ([x1, y1], [x2, y2]) => {
+  const [ ux, uy ] = [ x2 - x1, y2 - y1 ];
+  const magnitude = Math.hypot(ux, uy);
+  return [ ux / magnitude, uy / magnitude ];
+}
+
 const translateLine = ([[x1, y1], [x2, y2]], w=0) => {
   const [ vx, vy ] = normalVec([x1, y1], [x2, y2]);
 
   // translate stroke
   return [[ x1 + vx * w, y1 + vy * w ], [ x2 + vx * w, y2 + vy * w ]];
 };
+
+const rotate = ([vx, vy], a) => {
+  const cos = Math.cos(a);
+  const sin = Math.sin(a);
+  return [cos * vx + sin * vy, -sin * vx + cos * vy];
+}
 
 const slope = ([[x1, y1], [x2, y2]]) => (y2 - y1) / (x2 - x1);
 
@@ -52,7 +78,7 @@ const contains = ([[x1, y1], [x2, y2]], [px, py]) => {
   return px >= minX && px <= maxX && py >= minY && py <= maxY
 };
 
-const strokeWidthPath = w => (p, i, a) => {
+const strokeWidthPath = (w, segmentSize=Math.PI/20) => (p, i, a) => {
   const [px, py] = p;
   // reference point for stroke
   const prevRef = [a[i - 1] || [], p];
@@ -85,26 +111,23 @@ const strokeWidthPath = w => (p, i, a) => {
   if (contains(prev, intersect) || contains(next, intersect))
     return [intersect];
 
-  const [dx, dy] = [intersectX - px, intersectY - py];
-  const magnitude = Math.hypot(dx, dy);
-  const [vx, vy] = [dx / magnitude, dy / magnitude];
-  return [prev[1], [w * vx + px, w * vy + py], next[0]];
+  const arcAngle = angle(normalVec(...prevRef), normalVec(...nextRef));
+  const numArcs = arcAngle / segmentSize;
+  const numPoints = Math.max(0, Math.floor(numArcs) - 1);
 
-  //const pv = [prev[1][0] - prev[0][0], prev[1][1] - prev[0][1]];
-  //const nv = [next[1][0] - next[0][0], next[1][1] - next[0][1]];
-  //const dot = pv[0] * nv[0] + pv[1] * nv[1];
+  const arcPoints = [...Array(numPoints)]
+    .map((_, i) => {
+      const [ rx, ry ] = rotate(
+        normalVec(...prevRef),
+        (i + 1) * arcAngle / (numPoints + 1)
+      );
 
+      return [ px + rx * w, py + ry * w ];
+    })
+  ;
 
-
-  //return [prev[1], [w * vx + px, w * vy + py]];
-
-  //const distance = Math.hypot(prev[1][0] - next[0][0], prev[1][1] - next[0][1]);
-  //const angle = asin(
-
+  return [prev[1], ...arcPoints];
 };
-
-window.strokeWidthPath = strokeWidthPath;
-window.translateLine = translateLine;
 
 export default function Ribbon($) {
   $ = Object.assign({}, DEFAULTS, $);
@@ -157,7 +180,12 @@ export default function Ribbon($) {
     shape, 
     { depth: $.strokeDepth, bevelEnabled: false }
   );
-  const material = new T.MeshLambertMaterial({ color: $.color });
+  const material = new T.MeshLambertMaterial({
+    color: $.color,
+    opacity: $.opacity,
+    transparent: $.transparent,
+  });
+
   const mesh = new T.Mesh(geometry, material);
 
   mesh.castShadow = $.castShadow;
