@@ -14,7 +14,7 @@ const DEFAULTS = {
   yFn: ([_, y]) => y,
   width: 2000,
   height: 100,
-  strokeWidth: 1,
+  strokeWidth: 4,
   strokeDepth: 100,
   color: 0xff0000,
   edges: false,
@@ -25,26 +25,86 @@ const DEFAULTS = {
   receiveShadow: true,
 };
 
-const strokeWidthPath = w => (p, i, a) => {
-  // reference point for stroke
-  const [ px, py ] = p;
-
-  // p1 and p2 used to compute normal
-  const [ p1, p2 ] = a[i+1] === undefined ? [a[i-1], p] : [p, a[i+1]];
-
-  const [ x1, y1 ] = p1;
-  const [ x2, y2 ] = p2;
-
+const normalVec = ([x1, y1], [x2, y2]) => {
   // normal
   const [ nx, ny ] = [ y1 - y2, x2 - x1 ];
   const magnitude = Math.hypot(nx, ny);
 
   // normal vector
-  const [ vx, vy ] = [ nx / magnitude, ny / magnitude ];
+  return [ nx / magnitude, ny / magnitude ];
+}
+
+const translateLine = ([[x1, y1], [x2, y2]], w=0) => {
+  const [ vx, vy ] = normalVec([x1, y1], [x2, y2]);
 
   // translate stroke
-  return [ px + vx * w/2, py + vy * w/2 ];
+  return [[ x1 + vx * w, y1 + vy * w ], [ x2 + vx * w, y2 + vy * w ]];
 };
+
+const slope = ([[x1, y1], [x2, y2]]) => (y2 - y1) / (x2 - x1);
+
+const contains = ([[x1, y1], [x2, y2]], [px, py]) => {
+  const maxX = Math.max(x1, x2);
+  const maxY = Math.max(y1, y2);
+  const minX = Math.min(x1, x2);
+  const minY = Math.min(y1, y2);
+
+  return px >= minX && px <= maxX && py >= minY && py <= maxY
+};
+
+const strokeWidthPath = w => (p, i, a) => {
+  const [px, py] = p;
+  // reference point for stroke
+  const prevRef = [a[i - 1] || [], p];
+  const nextRef = [p, a[i + 1] || []];
+
+  const prev = translateLine(prevRef, w);
+  const next = translateLine(nextRef, w);
+
+  if (a[i - 1] === undefined)
+    return [next[0]];
+
+  if (a[i + 1] === undefined)
+    return [prev[1]];
+
+  const prevSlope = slope(prev);
+  const nextSlope = slope(next);
+  const slopeDiff = nextSlope - prevSlope;
+
+  //if (Math.abs(slopeDiff) < 0.0000001)
+  //  return [prev[1]];
+
+  const prevY0 = [prev[0][1] - prevSlope * prev[0][0]];
+  const nextY0 = [next[0][1] - nextSlope * next[0][0]];
+
+  const intersectX = (prevY0 - nextY0) / (nextSlope - prevSlope);
+  const intersectY = ((prevY0 * nextSlope) - (nextY0 * prevSlope)) / slopeDiff;
+
+  const intersect = [intersectX, intersectY];
+
+  if (contains(prev, intersect) || contains(next, intersect))
+    return [intersect];
+
+  const [dx, dy] = [intersectX - px, intersectY - py];
+  const magnitude = Math.hypot(dx, dy);
+  const [vx, vy] = [dx / magnitude, dy / magnitude];
+  return [prev[1], [w * vx + px, w * vy + py], next[0]];
+
+  //const pv = [prev[1][0] - prev[0][0], prev[1][1] - prev[0][1]];
+  //const nv = [next[1][0] - next[0][0], next[1][1] - next[0][1]];
+  //const dot = pv[0] * nv[0] + pv[1] * nv[1];
+
+
+
+  //return [prev[1], [w * vx + px, w * vy + py]];
+
+  //const distance = Math.hypot(prev[1][0] - next[0][0], prev[1][1] - next[0][1]);
+  //const angle = asin(
+
+};
+
+window.strokeWidthPath = strokeWidthPath;
+window.translateLine = translateLine;
 
 export default function Ribbon($) {
   $ = Object.assign({}, DEFAULTS, $);
@@ -69,8 +129,16 @@ export default function Ribbon($) {
 
   const stroke = strokeWidthPath($.strokeWidth)
 
-  const forwardPath = points.map(stroke);
-  const reversePath = points.reverse().map(stroke);
+  const forwardPath = points
+    .map(stroke)
+    .reduce((a,x) => a.concat(x), [])
+  ;
+
+  const reversePath = points
+    .reverse()
+    .map(stroke)
+    .reduce((a,x) => a.concat(x), [])
+  ;
 
   const path = forwardPath.concat(reversePath);
 
@@ -85,7 +153,10 @@ export default function Ribbon($) {
   ;
   shape.lineTo(startX, startY);
 
-  const geometry = new T.ExtrudeBufferGeometry(shape, { depth: $.strokeDepth });
+  const geometry = new T.ExtrudeBufferGeometry(
+    shape, 
+    { depth: $.strokeDepth, bevelEnabled: false }
+  );
   const material = new T.MeshLambertMaterial({ color: $.color });
   const mesh = new T.Mesh(geometry, material);
 

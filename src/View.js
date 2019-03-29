@@ -34,29 +34,29 @@ export default class View extends Component {
     const scene = new T.Scene();
     scene.background = new T.Color(0x051231);
 
-    const directionalLight = new T.DirectionalLight(0xffffff, 0.1);
+    const directionalLight = new T.DirectionalLight(0xffffff, 0.2);
     directionalLight.position.set(0, 200, 1000).normalize();
     scene.add(directionalLight);
 
-    const ambientLight = new T.AmbientLight(0xaaaaaa);
+    const ambientLight = new T.AmbientLight(0xcccccc);
     scene.add(ambientLight);
 
     const background = Box({
-      width: 2000,
-      height: 2000,
+      width: 3000,
+      height: 3000,
       depth: 10,
       // color: 0x8f8f8f8f,
        color: 0x000827,
       //edges: true,
       x: 0,
-      y: 0,
+      y: 100,
       z: -200,
     });
     scene.add(background);
 
-    const spotLight = new T.SpotLight(0xffffff, 1);
+    const spotLight = new T.SpotLight(0xffffff, 0.5);
     spotLight.castShadow = true;
-    spotLight.position.set(0, 300, 1200);
+    spotLight.position.set(0, 50, 1200);
     spotLight.angle = Math.PI / 3
     spotLight.shadow.camera.near = 200;
     spotLight.shadow.camera.far = 4000;
@@ -73,7 +73,7 @@ export default class View extends Component {
     renderer.setSize(width, height);
     viewEl.appendChild(renderer.domElement);
 
-    camera.position.set(0, -1000, 1500);
+    camera.position.set(0, -1000, 500);
     camera.lookAt(0, 0, 0);
 
     //scene.add(new T.AxesHelper(5));
@@ -103,8 +103,8 @@ export default class View extends Component {
 
     ribbons.forEach((r, $i) => {
       r.position.z = (
-        Math.sin((i * PI2 / 100) + ($i * PI2 / 10) + 1) * 50
-      );
+        ((Math.sin((i * PI2 / 100) + ($i * PI2 / 10)) + 1) * 8)
+      ) + 100;
     });
 
     // d1 = dchange(d1, box1);
@@ -115,12 +115,12 @@ export default class View extends Component {
     // box2.position.z += d2 * 10;
     // box3.position.z += d3 * 10;
 
-     //if (camera.position.y < 0) {
-     //  camera.position.z += 4;
-     //  camera.position.y += 5;
-     //  camera.lookAt(0, 0, 0);
-     //} else {
-     //}
+    if (camera.position.y < 0) {
+      camera.position.z += 4;
+      camera.position.y += 5;
+      camera.lookAt(0, 0, 0);
+    } else {
+    }
 
     renderer.render(scene, camera);
 
