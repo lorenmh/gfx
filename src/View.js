@@ -103,25 +103,40 @@ export default class View extends Component {
       d.map((d, i) => Ribbon({ color: color(i), data: d, y: 1000 - 100*i }))
     );
 
-    const streamers = (
-      d.map((d, i) => Ribbon({
-        color: color(i),
-        data: d,
-        y: 1000 - 100*i,
-        transparent: true,
-        castShadow: false,
-        receiveShadow: false 
-      }))
-    );
+    //const streamers = (
+    //  d.map((d, i) => Ribbon({
+    //    color: color(i),
+    //    data: d,
+    //    y: 1000 - 100*i,
+    //    transparent: true,
+    //    castShadow: false,
+    //    receiveShadow: false,
+    //    opacity: 0.2,
+    //  }))
+    //);
 
-    scene.add.apply(scene, streamers);
+    //const streamers2 = (
+    //  d.map((d, i) => Ribbon({
+    //    color: color(i),
+    //    data: d,
+    //    y: 1000 - 100*i,
+    //    //transparent: true,
+    //    castShadow: false,
+    //    receiveShadow: false,
+    //    opacity: 0.1,
+    //  }))
+    //);
+
+
+    //scene.add.apply(scene, streamers2);
+    //scene.add.apply(scene, streamers);
     scene.add.apply(scene, ribbons);
 
-    Object.assign(this, { ribbons, streamers });
+    Object.assign(this, { ribbons, });
   }
 
   animate(i) {
-    const { camera, renderer, scene, ribbons, streamers } = this;
+    const { camera, renderer, scene, ribbons, } = this;
 
     ribbons.forEach((r, $i) => {
       r.position.z = (
@@ -129,11 +144,17 @@ export default class View extends Component {
       ) + 100;
     });
 
-    streamers.forEach((r, $i) => {
-      r.position.z = (
-        ((Math.sin((((i-10)%100) * PI2 / 100) + ($i * PI2 / 10)) + 1) * 20)
-      ) + 100;
-    });
+    //streamers.forEach((r, $i) => {
+    //  r.position.z = (
+    //    ((Math.sin((((i-10)%100) * PI2 / 100) + ($i * PI2 / 10)) + 1) * 80)
+    //  ) + 100;
+    //});
+
+    //streamers2.forEach((r, $i) => {
+    //  r.position.z = (
+    //    ((Math.sin((((i-10)%100) * PI2 / 100) + ($i * PI2 / 10)) + 1) * 80)
+    //  ) + 100;
+    //});
 
     // d1 = dchange(d1, box1);
     // d2 = dchange(d2, box2);
@@ -143,12 +164,12 @@ export default class View extends Component {
     // box2.position.z += d2 * 10;
     // box3.position.z += d3 * 10;
 
-    // if (camera.position.y < 0) {
-    //   camera.position.z += 4;
-    //   camera.position.y += 5;
-    //   camera.lookAt(0, 0, 0);
-    // } else {
-    // }
+    //if (camera.position.y < 0) {
+    //  camera.position.z += 4;
+    //  camera.position.y += 5;
+    //  camera.lookAt(0, 0, 0);
+    //} else {
+    //}
 
     renderer.render(scene, camera);
 

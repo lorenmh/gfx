@@ -15,8 +15,8 @@ const DEFAULTS = {
   xFn: ([x]) => x,
   yFn: ([_, y]) => y,
   width: 2000,
-  height: 90,
-  strokeWidth: 4,
+  height: 80,
+  strokeWidth: 6,
   strokeDepth: 30,
   color: 0xff0000,
   transparent: false,
@@ -31,18 +31,17 @@ const DEFAULTS = {
 
 const normalVec = ([x1, y1], [x2, y2]) => {
   // normal
-  const [ nx, ny ] = [ y1 - y2, x2 - x1 ];
-  const magnitude = Math.hypot(nx, ny);
-
-  // normal vector
-  return [ nx / magnitude, ny / magnitude ];
+  const n = [ y1 - y2, x2 - x1 ];
+  const m = magnitude(n);
+  const [ nx, ny ] = n;
+  return [ nx / m, ny / m ];;
 }
 
 const dot = ([x1, y1], [x2, y2]) => {
   return x1 * x2 + y1 * y2;
 }
 
-const magnitude = v => Math.hypot.apply(Math, v);
+const magnitude = v => Math.hypot(...v);
 
 const angle = (v1, v2) => {
   return Math.acos(dot(v1, v2) / (magnitude(v1) * magnitude(v2)));
@@ -50,8 +49,8 @@ const angle = (v1, v2) => {
 
 const unitVec = ([x1, y1], [x2, y2]) => {
   const [ ux, uy ] = [ x2 - x1, y2 - y1 ];
-  const magnitude = Math.hypot(ux, uy);
-  return [ ux / magnitude, uy / magnitude ];
+  const m = magnitude([ux, uy]);
+  return [ ux / m, uy / m ];
 }
 
 const translateLine = ([[x1, y1], [x2, y2]], w=0) => {
@@ -78,7 +77,7 @@ const contains = ([[x1, y1], [x2, y2]], [px, py]) => {
   return px >= minX && px <= maxX && py >= minY && py <= maxY
 };
 
-const strokeWidthPath = (w, segmentSize=Math.PI/20) => (p, i, a) => {
+const strokeWidthPath = (w, segmentSize=Math.PI/8) => (p, i, a) => {
   const [px, py] = p;
   // reference point for stroke
   const prevRef = [a[i - 1] || [], p];
@@ -100,8 +99,8 @@ const strokeWidthPath = (w, segmentSize=Math.PI/20) => (p, i, a) => {
   //if (Math.abs(slopeDiff) < 0.0000001)
   //  return [prev[1]];
 
-  const prevY0 = [prev[0][1] - prevSlope * prev[0][0]];
-  const nextY0 = [next[0][1] - nextSlope * next[0][0]];
+  const prevY0 = prev[0][1] - prevSlope * prev[0][0];
+  const nextY0 = next[0][1] - nextSlope * next[0][0];
 
   const intersectX = (prevY0 - nextY0) / (nextSlope - prevSlope);
   const intersectY = ((prevY0 * nextSlope) - (nextY0 * prevSlope)) / slopeDiff;
@@ -135,8 +134,8 @@ export default function Ribbon($) {
   const x = $.data.map($.xFn);
   const y = $.data.map($.yFn);
 
-  const xBounds = [ Math.min.apply(null, x), Math.max.apply(null, x) ];
-  const yBounds = [ Math.min.apply(null, y), Math.max.apply(null, y) ];
+  const xBounds = [ Math.min(...x), Math.max(...x) ];
+  const yBounds = [ Math.min(...y), Math.max(...y) ];
 
   const xScale = d3.scaleLinear()
     .domain(xBounds)
@@ -154,16 +153,16 @@ export default function Ribbon($) {
 
   const forwardPath = points
     .map(stroke)
-    .reduce((a,x) => a.concat(x), [])
+    .reduce((a, p) => [...a, ...p])
   ;
 
   const reversePath = points
     .reverse()
     .map(stroke)
-    .reduce((a,x) => a.concat(x), [])
+    .reduce((a, p) => [...a, ...p])
   ;
 
-  const path = forwardPath.concat(reversePath);
+  const path = [...forwardPath, ...reversePath];
 
   const shape = new T.Shape();
 
