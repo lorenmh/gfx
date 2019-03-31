@@ -25,6 +25,7 @@ export default class View extends Component {
 
     this.viewRef = React.createRef();
     this.animate = this.animate.bind(this);
+    this.update = this.update.bind(this);
   }
 
   initialize() {
@@ -81,6 +82,15 @@ export default class View extends Component {
     window.d3 = d3;
 
     Object.assign(this, { scene, camera, renderer });
+  }
+
+  update() {
+    const viewEl = this.viewRef.current;
+    const { width, height } =  viewEl.getBoundingClientRect();
+    const { camera, renderer } = this;
+
+    camera.aspect = width/height;
+    renderer.setSize(width, height);
   }
 
   populateScene() {
@@ -180,6 +190,11 @@ export default class View extends Component {
     this.initialize();
     this.populateScene();
     this.animate(0);
+    window.addEventListener('resize', this.update);
+  }
+
+  componentDidUnmount() {
+    window.removeEventListener('resize', this.update);
   }
 
   render() {
